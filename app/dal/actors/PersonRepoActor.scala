@@ -3,8 +3,7 @@ package dal.actors
 import akka.actor.{Actor, DiagnosticActorLogging, Props, Status}
 import dal.actors.PersonRepoActor.{CreatePerson, GetPersons, PersonCreated, RepoPersons}
 import models.Person
-
-import scala.collection.JavaConverters._
+import org.slf4j.MDC
 
 class PersonRepoActor extends Actor with DiagnosticActorLogging {
 
@@ -19,13 +18,8 @@ class PersonRepoActor extends Actor with DiagnosticActorLogging {
       sender() ! Status.Failure(new IllegalArgumentException("mrerror is not vaild"))
 
     case CreatePerson(name, age) =>
-      val currentMdc = new java.util.HashMap[String, Any]
-      currentMdc.putAll(log.mdc.asJava)
       val person = Person(newPersonNr(), name, age)
-
-      currentMdc.put("pnr", person.id)
-      log.setMDC(currentMdc)
-
+      MDC.put("pnr", String.valueOf(person.id))
       persons = person +: persons
       log.info("person persisted")
       sender() ! PersonCreated(person)

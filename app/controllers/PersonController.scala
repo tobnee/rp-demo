@@ -1,6 +1,9 @@
 package controllers
 
+import java.util.UUID
+
 import akka.actor.ActorSystem
+import org.slf4j.MDC
 import play.api._
 import play.api.mvc._
 import play.api.i18n._
@@ -44,7 +47,7 @@ class PersonController @Inject() (repo: AkkaPersonRepository, val messagesApi: M
    * This is asynchronous, since we're invoking the asynchronous methods on PersonRepository.
    */
   def addPerson = Action.async { implicit request =>
-
+    MDC.put("req_id", UUID.randomUUID().toString)
     // Bind the form first, then fold the result, passing a function to handle errors, and a function to handle succes.
     personForm.bindFromRequest.fold(
       // The error function. We return the index page with the error form, which will render the errors.
